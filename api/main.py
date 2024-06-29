@@ -4,7 +4,6 @@ import httpx
 from starlette.config import Config
 from fastapi.middleware.cors import CORSMiddleware
 
-# Load environment variables from .env file
 config = Config(".env")
 CLIENT_ID = config("SPOTIFY_CLIENT_ID", cast=str)
 CLIENT_SECRET = config("SPOTIFY_CLIENT_SECRET", cast=str)
@@ -51,9 +50,6 @@ async def callback(code: str):
 
 @app.get("/playlists")
 async def get_playlists(access_token: str):
-    """
-    Fetch all playlists for the user using the provided access token.
-    """
     url = "https://api.spotify.com/v1/me/playlists"
     headers = {
         "Authorization": f"Bearer {access_token}"

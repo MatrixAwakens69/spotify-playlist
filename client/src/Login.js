@@ -2,7 +2,6 @@ import React from "react";
 
 const Login = () => {
   const handleLogin = () => {
-    // Redirect to the backend /login route
     window.location.href = "http://localhost:8000/login";
   };
 
