@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
+from zipfile import ZipFile
 import httpx
+import os
 from starlette.config import Config
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -60,3 +62,26 @@ async def get_playlists(access_token: str):
         raise HTTPException(status_code=response.status_code, detail="Failed to fetch playlists.")
     
     return response.json()
+
+async def fetch_playlist_details(playlist_id: str, access_token: str):
+    url = f"https://api.spotify.com/v1/playlists/{playlist_id}"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, headers=headers)
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail="Failed to fetch playlist details.")
+    return response.json()
+
+async def create_zip_from_mp3_files(mp3_files):
+    zip_file_path = "playlist.zip"
+    with ZipFile(zip_file_path, 'w') as zipf:
+        for file in mp3_files:
+            zipf.write(file, os.path.basename(file))
+    return zip_file_path
+
+@app.get("/download_playlist/{playlist_id}")
+async def download_playlist(playlist_id: str, access_token: str):
+    playlist_details = await fetch_playlist_details(playlist_id, access_token)
+    mp3_files = await download_tracks_as_mp3(playlist_details)
+    zip_file_path = await create_zip_from_mp3_files(mp3_files)
+    return FileResponse(path=zip_file_path, media_type='application/zip', filename="playlist.zip")
