@@ -50,9 +50,12 @@ const Playlists = () => {
               key={playlist.id}
               className="bg-gray-100 p-4 rounded-lg cursor-pointer bg-cover bg-center w-96 h-96 flex flex-col justify-between"
               style={{ backgroundImage: `url(${playlist.images[0]?.url})` }}
-              onClick={() =>
-                window.open(playlist.external_urls.spotify, "_blank")
-              }
+              onClick={() => {
+                const url = playlist.tracks.href;
+                const accessToken = localStorage.getItem("accessToken");
+                console.log("Tracks:", url + "?access_token=" + accessToken);
+                window.open(playlist.external_urls.spotify, "_blank");
+              }}
             >
               <div className="text-white text-3xl font-bold backdrop-brightness-50 p-3 rounded-lg">
                 {playlist.name}
